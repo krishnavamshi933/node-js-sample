@@ -18,6 +18,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Use SSH key
+        run: |
+          echo "${{ secrets.EC2_INSTANCE_PEM_FILE }}" > ansible_key
+          chmod 600 ansible_key
+
+      - name: Debug SSH key
+        run: |
+          echo "SSH private key:"
+          echo "${{ secrets.EC2_INSTANCE_PEM_FILE }}"
+          echo "${{ secrets.EC2_INSTANCE_PEM_FILE }}" > ansible_key
+          chmod 600 ansible_key
+
       - name: Run Ansible Playbook
         uses: dawidd6/action-ansible-playbook@5d970176ea4bfd99a3f5004d48e293fe0994eda1
         with:
@@ -25,8 +37,7 @@ jobs:
           options: |
             --inventory ${{ github.event.inputs.server_ip }},
             --extra-vars "deploy_server_hostname=${{ github.event.inputs.deploy_server_hostname }}"
-            
-          key: ${{ secrets.EC2_INSTANCE_PEM_FILE }}
+          key: ./ansible_key
           requirements: requirements.yml
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
